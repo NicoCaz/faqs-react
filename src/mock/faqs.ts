@@ -1,17 +1,4 @@
-import type { Node, Edge } from "reactflow";
-import { MarkerType } from "reactflow";
-
-interface FAQNodeData {
-  type: "N1" | "N2" | "N3" | "N4";
-  title: string;
-  url?: string;
-  onUpdate: (id: string, data: Partial<FAQNodeData>) => void;
-  onDelete: (id: string) => void;
-}
-
-// Función temporal para los datos iniciales
-const tempUpdate = (id: string, data: Partial<FAQNodeData>) => {};
-const tempDelete = (id: string) => {};
+import type { Node } from "reactflow";
 
 export const faqs: Node[] = [
   {
