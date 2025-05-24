@@ -52,15 +52,45 @@ const FAQFlowEditor: React.FC = () => {
   const processNodes = (nodes: Node[]): { nodes: Node[]; edges: Edge[] } => {
     const processedNodes: Node[] = [];
     const edges: Edge[] = [];
-    let xOffset = 0;
-    let yOffset = 0;
+    const NODE_WIDTH = 256; // Ancho del nodo (w-64 = 16rem = 256px)
+    const NODE_HEIGHT = 200; // Altura aproximada del nodo
+    const HORIZONTAL_SPACING = NODE_WIDTH + 100; // Espacio horizontal entre nodos
+    const VERTICAL_SPACING = NODE_HEIGHT + 50; // Espacio vertical entre niveles
 
-    const processNode = (node: Node, level: number = 0) => {
+    // Función para calcular el ancho total de un nodo y sus hijos
+    const calculateTreeWidth = (node: Node): number => {
+      if (!node.data.children || !Array.isArray(node.data.children)) {
+        return NODE_WIDTH;
+      }
+      const childrenNodes = node.data.children.filter(
+        (child: any) => typeof child === "object"
+      );
+      if (childrenNodes.length === 0) {
+        return NODE_WIDTH;
+      }
+      const childrenWidth = childrenNodes.reduce(
+        (total: number, child: Node) => {
+          return total + calculateTreeWidth(child);
+        },
+        0
+      );
+      return Math.max(
+        NODE_WIDTH,
+        childrenWidth + (childrenNodes.length - 1) * HORIZONTAL_SPACING
+      );
+    };
+
+    const processNode = (
+      node: Node,
+      level: number = 0,
+      x: number = 0,
+      y: number = 0
+    ) => {
       // Procesar el nodo actual
       const newNode = {
         ...node,
-        type: "customNode", // Asegurarnos que use el tipo correcto
-        position: { x: xOffset, y: yOffset },
+        type: "customNode",
+        position: { x, y },
         data: {
           ...node.data,
           children: [],
@@ -78,59 +108,78 @@ const FAQFlowEditor: React.FC = () => {
         const childrenNodes = node.data.children.filter(
           (child: any) => typeof child === "object"
         );
-        xOffset += 300;
         const childrenCount = childrenNodes.length;
-        const startY = yOffset - ((childrenCount - 1) * 200) / 2;
 
-        childrenNodes.forEach((childNode: Node, index: number) => {
-          yOffset = startY + index * 200;
-
-          // Establecer la relación padre-hijo
-          childNode.data = {
-            ...childNode.data,
-            parentId: node.id,
-          };
-
-          processNode(childNode, level + 1);
-
-          // Crear el edge
-          edges.push({
-            id: `edge-${node.id}-${childNode.id}`,
-            source: node.id,
-            target: childNode.id,
-            type: "smoothstep",
-            animated: true,
-            style: {
-              stroke:
-                NODE_TYPES[childNode.data.level as keyof typeof NODE_TYPES]
-                  ?.color || "#6b7280",
-              strokeWidth: 2,
+        if (childrenCount > 0) {
+          // Calcular el ancho total de todos los hijos
+          const childrenWidth = childrenNodes.reduce(
+            (total: number, child: Node) => {
+              return total + calculateTreeWidth(child);
             },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              color:
-                NODE_TYPES[childNode.data.level as keyof typeof NODE_TYPES]
-                  ?.color || "#6b7280",
-            },
+            0
+          );
+          const totalWidth =
+            childrenWidth + (childrenCount - 1) * HORIZONTAL_SPACING;
+
+          // Calcular la posición inicial x para centrar los hijos debajo del padre
+          const startX = x - totalWidth / 2 + NODE_WIDTH / 2;
+          let currentX = startX;
+
+          childrenNodes.forEach((childNode: Node) => {
+            // Calcular el ancho del subárbol del hijo
+            const childTreeWidth = calculateTreeWidth(childNode);
+
+            // Establecer la relación padre-hijo
+            childNode.data = {
+              ...childNode.data,
+              parentId: node.id,
+            };
+
+            // Procesar el hijo recursivamente
+            processNode(childNode, level + 1, currentX, y + VERTICAL_SPACING);
+
+            // Crear el edge
+            edges.push({
+              id: `edge-${node.id}-${childNode.id}`,
+              source: node.id,
+              target: childNode.id,
+              type: "smoothstep",
+              animated: true,
+              style: {
+                stroke:
+                  NODE_TYPES[childNode.data.level as keyof typeof NODE_TYPES]
+                    ?.color || "#6b7280",
+                strokeWidth: 2,
+              },
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+                color:
+                  NODE_TYPES[childNode.data.level as keyof typeof NODE_TYPES]
+                    ?.color || "#6b7280",
+              },
+            });
+
+            // Actualizar el array de hijos del nodo padre
+            const parentNode = processedNodes.find((n) => n.id === node.id);
+            if (parentNode) {
+              parentNode.data.children = [
+                ...(parentNode.data.children || []),
+                childNode.id,
+              ];
+            }
+
+            // Actualizar la posición X para el siguiente hijo
+            currentX += childTreeWidth + HORIZONTAL_SPACING;
           });
-
-          // Actualizar el array de hijos del nodo padre
-          const parentNode = processedNodes.find((n) => n.id === node.id);
-          if (parentNode) {
-            parentNode.data.children = [
-              ...(parentNode.data.children || []),
-              childNode.id,
-            ];
-          }
-        });
-        xOffset -= 300;
+        }
       }
     };
 
+    // Procesar cada nodo raíz
     nodes.forEach((node) => {
-      xOffset = 0;
-      yOffset += 300;
-      processNode(node);
+      const treeWidth = calculateTreeWidth(node);
+      const startX = (window.innerWidth - treeWidth) / 2;
+      processNode(node, 0, startX, 50);
     });
 
     return { nodes: processedNodes, edges };
@@ -349,6 +398,20 @@ const FAQFlowEditor: React.FC = () => {
     [setEdges, nodes, handleAddChild]
   );
 
+  // Agregar manejador para eliminar conexión
+  const onEdgeClick = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      const shouldDelete = window.confirm("¿Desea eliminar esta conexión?");
+      if (shouldDelete) {
+        setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+        // También eliminar la relación padre-hijo
+        const [sourceId, targetId] = [edge.source, edge.target];
+        handleRemoveChild(sourceId, targetId);
+      }
+    },
+    [setEdges, handleRemoveChild]
+  );
+
   return (
     <div className="w-full h-screen bg-gray-100">
       {/* Barra de herramientas */}
@@ -374,11 +437,14 @@ const FAQFlowEditor: React.FC = () => {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
+            onEdgeClick={onEdgeClick}
             nodeTypes={nodeTypes}
             connectionMode={ConnectionMode.Loose}
             snapToGrid={true}
             snapGrid={[15, 15]}
             fitView
+            minZoom={0.1}
+            maxZoom={2}
             className="bg-gray-50"
             defaultEdgeOptions={{
               type: "smoothstep",

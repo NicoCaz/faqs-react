@@ -6,11 +6,11 @@ import { NODE_TYPES } from "./types";
 const HandleGroup: React.FC<{
   position: Position;
   color: string;
-  count: number;
-}> = ({ position, color, count }) => {
+  childrenCount: number;
+}> = ({ position, color, childrenCount }) => {
   const isTop = position === Position.Top;
   const width = 200; // Ancho total disponible para los handles
-  const spacing = width / (count + 1); // Espacio entre handles
+  const handleCount = Math.max(childrenCount + 1, 1); // Siempre al menos 1 handle, y uno más que el número de hijos
 
   return (
     <div
@@ -20,7 +20,7 @@ const HandleGroup: React.FC<{
         bottom: !isTop ? "-8px" : "auto",
       }}
     >
-      {Array.from({ length: count }).map((_, index) => (
+      {Array.from({ length: handleCount }).map((_, index) => (
         <Handle
           key={`${position}-${index}`}
           type={isTop ? "target" : "source"}
@@ -52,6 +52,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const nodeLabel =
     NODE_TYPES[data.level as keyof typeof NODE_TYPES]?.label ||
     "Nivel Desconocido";
+  const childrenCount = (data.children || []).length;
 
   const handleSave = () => {
     data.onUpdate(id, { title, url, description });
@@ -80,7 +81,11 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   if (isEditing) {
     return (
       <div className="bg-white border-2 border-gray-300 rounded-lg p-4 w-64 shadow-lg relative">
-        <HandleGroup position={Position.Top} color={nodeColor} count={3} />
+        <HandleGroup
+          position={Position.Top}
+          color={nodeColor}
+          childrenCount={childrenCount}
+        />
 
         <div className="mb-3">
           <label className="block text-sm font-medium mb-1">Título:</label>
@@ -127,7 +132,11 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
           </button>
         </div>
 
-        <HandleGroup position={Position.Bottom} color={nodeColor} count={3} />
+        <HandleGroup
+          position={Position.Bottom}
+          color={nodeColor}
+          childrenCount={childrenCount}
+        />
       </div>
     );
   }
@@ -140,7 +149,11 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         borderColor: nodeColor,
       }}
     >
-      <HandleGroup position={Position.Top} color={nodeColor} count={3} />
+      <HandleGroup
+        position={Position.Top}
+        color={nodeColor}
+        childrenCount={childrenCount}
+      />
 
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-center gap-2">
@@ -279,7 +292,11 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         Doble clic para editar
       </div>
 
-      <HandleGroup position={Position.Bottom} color={nodeColor} count={3} />
+      <HandleGroup
+        position={Position.Bottom}
+        color={nodeColor}
+        childrenCount={childrenCount}
+      />
     </div>
   );
 };
