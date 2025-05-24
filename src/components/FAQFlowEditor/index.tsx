@@ -20,6 +20,33 @@ import { NODE_TYPES } from "./types";
 import type { NodeData } from "./types";
 import { NodeModal } from "./NodeModal";
 
+// Función para actualizar el archivo JSON
+const updateFaqsJson = async (nodes: Node[]) => {
+  try {
+    console.log("Enviando datos a la API:", nodes);
+    const response = await fetch('/api/update-faqs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ faqs: nodes }),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || data.message || 'Error al guardar los cambios');
+    }
+
+    if (!data.success) {
+      throw new Error(data.message || 'Error al guardar los cambios');
+    }
+  } catch (error) {
+    console.error('Error al actualizar el archivo JSON:', error);
+    alert(`Error al guardar los cambios: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+  }
+};
+
 const FAQFlowEditor: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -32,6 +59,7 @@ const FAQFlowEditor: React.FC = () => {
       description: string;
       url: string;
       level: number;
+      order: number;
     };
   } | null>(null);
 
@@ -157,27 +185,30 @@ const FAQFlowEditor: React.FC = () => {
 
   // Función para actualizar un nodo
   const updateNode = useCallback(
-    (nodeId: string, newData: Partial<NodeData>) => {
-      setNodes((nds) =>
-        nds.map((node) =>
-          node.id === nodeId
-            ? { ...node, data: { ...node.data, ...newData } }
-            : node
-        )
+    async (nodeId: string, newData: Partial<NodeData>) => {
+      const updatedNodes = nodes.map((node) =>
+        node.id === nodeId
+          ? { ...node, data: { ...node.data, ...newData } }
+          : node
       );
+      setNodes(updatedNodes);
+      await updateFaqsJson(updatedNodes);
     },
-    [setNodes]
+    [setNodes, nodes]
   );
 
   // Función para eliminar un nodo
   const deleteNode = useCallback(
-    (nodeId: string) => {
-      setNodes((nds) => nds.filter((node) => node.id !== nodeId));
-      setEdges((eds) =>
-        eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
+    async (nodeId: string) => {
+      const updatedNodes = nodes.filter((node) => node.id !== nodeId);
+      const updatedEdges = edges.filter(
+        (edge) => edge.source !== nodeId && edge.target !== nodeId
       );
+      setNodes(updatedNodes);
+      setEdges(updatedEdges);
+      await updateFaqsJson(updatedNodes);
     },
-    [setNodes, setEdges]
+    [setNodes, setEdges, nodes, edges]
   );
 
   // Función para abrir el modal de edición
@@ -190,6 +221,7 @@ const FAQFlowEditor: React.FC = () => {
         description: data.description || "",
         url: data.url || "",
         level: data.level,
+        order: data.order,
       },
     });
     setIsModalOpen(true);
@@ -205,14 +237,27 @@ const FAQFlowEditor: React.FC = () => {
 
   // Función para manejar el guardado del modal
   const handleModalSave = useCallback(
-    (data: {
+    async (data: {
       title: string;
       description: string;
       url: string;
       level: number;
+      order: number;
     }) => {
       if (modalData?.mode === "edit" && modalData.nodeId) {
-        updateNode(modalData.nodeId, data);
+        const updatedNodes = nodes.map((node) =>
+          node.id === modalData.nodeId
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  ...data,
+                },
+              }
+            : node
+        );
+        setNodes(updatedNodes);
+        await updateFaqsJson(updatedNodes);
       } else {
         const newNodeId = `node-${Date.now()}`;
         const newNode: Node<NodeData> = {
@@ -229,7 +274,7 @@ const FAQFlowEditor: React.FC = () => {
             type: 0,
             level: data.level,
             status: 1,
-            order: 0,
+            order: data.order,
             children: [],
             onUpdate: updateNode,
             onDelete: deleteNode,
@@ -238,14 +283,16 @@ const FAQFlowEditor: React.FC = () => {
             onSetParent: handleSetParent,
           },
         };
-        setNodes((nds) => [...nds, newNode]);
+        const updatedNodes = [...nodes, newNode];
+        setNodes(updatedNodes);
+        await updateFaqsJson(updatedNodes);
       }
       setIsModalOpen(false);
       setModalData(null);
     },
     [
       modalData,
-      updateNode,
+      nodes,
       setNodes,
       handleAddChild,
       handleRemoveChild,

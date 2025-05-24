@@ -9,12 +9,14 @@ interface NodeModalProps {
     description: string;
     url: string;
     level: number;
+    order: number;
   }) => void;
   initialData?: {
     title: string;
     description: string;
     url: string;
     level: number;
+    order: number;
   };
 }
 
@@ -28,6 +30,7 @@ export const NodeModal: React.FC<NodeModalProps> = ({
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [level, setLevel] = useState<number>(1);
+  const [order, setOrder] = useState<number>(0);
 
   useEffect(() => {
     if (isOpen) {
@@ -36,11 +39,13 @@ export const NodeModal: React.FC<NodeModalProps> = ({
         setDescription(initialData.description || "");
         setUrl(initialData.url || "");
         setLevel(initialData.level);
+        setOrder(initialData.order);
       } else {
         setTitle("");
         setDescription("");
         setUrl("");
         setLevel(1);
+        setOrder(0);
       }
     }
   }, [isOpen, initialData]);
@@ -49,7 +54,7 @@ export const NodeModal: React.FC<NodeModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ title, description, url, level });
+    onSave({ title, description, url, level, order });
   };
 
   const handleClose = () => {
@@ -57,6 +62,7 @@ export const NodeModal: React.FC<NodeModalProps> = ({
     setDescription("");
     setUrl("");
     setLevel(1);
+    setOrder(0);
     onClose();
   };
 
@@ -101,6 +107,25 @@ export const NodeModal: React.FC<NodeModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
+              Orden
+            </label>
+            <input
+              type="number"
+              value={order}
+              onChange={(e) => setOrder(Number(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Orden de la FAQ"
+              min="0"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              El orden determina la posición de izquierda a derecha entre FAQs
+              del mismo nivel
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Título
             </label>
             <input
@@ -131,11 +156,11 @@ export const NodeModal: React.FC<NodeModalProps> = ({
               URL
             </label>
             <input
-              type="url"
+              type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="https://ejemplo.com/faq"
+              placeholder="URL de la FAQ"
             />
           </div>
 
