@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -18,172 +18,22 @@ import { NodeLegend } from "./NodeLegend";
 import { AddNodeButton } from "./AddNodeButton";
 import { NODE_TYPES } from "./types";
 import type { NodeData } from "./types";
+import { NodeModal } from "./NodeModal";
 
 const FAQFlowEditor: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
-  // Función para actualizar un nodo
-  const updateNode = useCallback(
-    (nodeId: string, newData: Partial<NodeData>) => {
-      setNodes((nds) =>
-        nds.map((node) =>
-          node.id === nodeId
-            ? { ...node, data: { ...node.data, ...newData } }
-            : node
-        )
-      );
-    },
-    [setNodes]
-  );
-
-  // Función para eliminar un nodo
-  const deleteNode = useCallback(
-    (nodeId: string) => {
-      setNodes((nds) => nds.filter((node) => node.id !== nodeId));
-      setEdges((eds) =>
-        eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
-      );
-    },
-    [setNodes, setEdges]
-  );
-
-  // Función para procesar los nodos y crear las conexiones
-  const processNodes = (nodes: Node[]): { nodes: Node[]; edges: Edge[] } => {
-    const processedNodes: Node[] = [];
-    const edges: Edge[] = [];
-    const NODE_WIDTH = 256; // Ancho del nodo (w-64 = 16rem = 256px)
-    const NODE_HEIGHT = 200; // Altura aproximada del nodo
-    const HORIZONTAL_SPACING = NODE_WIDTH + 100; // Espacio horizontal entre nodos
-    const VERTICAL_SPACING = NODE_HEIGHT + 50; // Espacio vertical entre niveles
-
-    // Función para calcular el ancho total de un nodo y sus hijos
-    const calculateTreeWidth = (node: Node): number => {
-      if (!node.data.children || !Array.isArray(node.data.children)) {
-        return NODE_WIDTH;
-      }
-      const childrenNodes = node.data.children.filter(
-        (child: any) => typeof child === "object"
-      );
-      if (childrenNodes.length === 0) {
-        return NODE_WIDTH;
-      }
-      const childrenWidth = childrenNodes.reduce(
-        (total: number, child: Node) => {
-          return total + calculateTreeWidth(child);
-        },
-        0
-      );
-      return Math.max(
-        NODE_WIDTH,
-        childrenWidth + (childrenNodes.length - 1) * HORIZONTAL_SPACING
-      );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalData, setModalData] = useState<{
+    mode: "create" | "edit";
+    nodeId?: string;
+    initialData?: {
+      title: string;
+      description: string;
+      url: string;
+      level: number;
     };
-
-    const processNode = (
-      node: Node,
-      level: number = 0,
-      x: number = 0,
-      y: number = 0
-    ) => {
-      // Procesar el nodo actual
-      const newNode = {
-        ...node,
-        type: "customNode",
-        position: { x, y },
-        data: {
-          ...node.data,
-          children: [],
-          onUpdate: updateNode,
-          onDelete: deleteNode,
-          onAddChild: handleAddChild,
-          onRemoveChild: handleRemoveChild,
-          onSetParent: handleSetParent,
-        },
-      };
-      processedNodes.push(newNode);
-
-      // Procesar los hijos si existen
-      if (node.data.children && Array.isArray(node.data.children)) {
-        const childrenNodes = node.data.children.filter(
-          (child: any) => typeof child === "object"
-        );
-        const childrenCount = childrenNodes.length;
-
-        if (childrenCount > 0) {
-          // Calcular el ancho total de todos los hijos
-          const childrenWidth = childrenNodes.reduce(
-            (total: number, child: Node) => {
-              return total + calculateTreeWidth(child);
-            },
-            0
-          );
-          const totalWidth =
-            childrenWidth + (childrenCount - 1) * HORIZONTAL_SPACING;
-
-          // Calcular la posición inicial x para centrar los hijos debajo del padre
-          const startX = x - totalWidth / 2 + NODE_WIDTH / 2;
-          let currentX = startX;
-
-          childrenNodes.forEach((childNode: Node) => {
-            // Calcular el ancho del subárbol del hijo
-            const childTreeWidth = calculateTreeWidth(childNode);
-
-            // Establecer la relación padre-hijo
-            childNode.data = {
-              ...childNode.data,
-              parentId: node.id,
-            };
-
-            // Procesar el hijo recursivamente
-            processNode(childNode, level + 1, currentX, y + VERTICAL_SPACING);
-
-            // Crear el edge
-            edges.push({
-              id: `edge-${node.id}-${childNode.id}`,
-              source: node.id,
-              target: childNode.id,
-              type: "smoothstep",
-              animated: true,
-              style: {
-                stroke:
-                  NODE_TYPES[childNode.data.level as keyof typeof NODE_TYPES]
-                    ?.color || "#6b7280",
-                strokeWidth: 2,
-              },
-              markerEnd: {
-                type: MarkerType.ArrowClosed,
-                color:
-                  NODE_TYPES[childNode.data.level as keyof typeof NODE_TYPES]
-                    ?.color || "#6b7280",
-              },
-            });
-
-            // Actualizar el array de hijos del nodo padre
-            const parentNode = processedNodes.find((n) => n.id === node.id);
-            if (parentNode) {
-              parentNode.data.children = [
-                ...(parentNode.data.children || []),
-                childNode.id,
-              ];
-            }
-
-            // Actualizar la posición X para el siguiente hijo
-            currentX += childTreeWidth + HORIZONTAL_SPACING;
-          });
-        }
-      }
-    };
-
-    // Procesar cada nodo raíz
-    nodes.forEach((node) => {
-      const treeWidth = calculateTreeWidth(node);
-      const startX = (window.innerWidth - treeWidth) / 2;
-      processNode(node, 0, startX, 50);
-    });
-
-    return { nodes: processedNodes, edges };
-  };
+  } | null>(null);
 
   // Función para agregar un hijo a un nodo
   const handleAddChild = useCallback(
@@ -305,42 +155,242 @@ const FAQFlowEditor: React.FC = () => {
     [setNodes, handleAddChild]
   );
 
-  // Función para agregar un nuevo nodo
-  const handleAddNode = useCallback(
-    (level: number) => {
-      const newNodeId = `node-${Date.now()}`;
-      const newNode: Node<NodeData> = {
-        id: newNodeId,
-        type: "customNode",
-        position: {
-          x: Math.random() * 500,
-          y: Math.random() * 500,
+  // Función para actualizar un nodo
+  const updateNode = useCallback(
+    (nodeId: string, newData: Partial<NodeData>) => {
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, ...newData } }
+            : node
+        )
+      );
+    },
+    [setNodes]
+  );
+
+  // Función para eliminar un nodo
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+      setEdges((eds) =>
+        eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
+      );
+    },
+    [setNodes, setEdges]
+  );
+
+  // Función para abrir el modal de edición
+  const handleEditNode = useCallback((nodeId: string, data: NodeData) => {
+    setModalData({
+      mode: "edit",
+      nodeId,
+      initialData: {
+        title: data.title,
+        description: data.description || "",
+        url: data.url || "",
+        level: data.level,
+      },
+    });
+    setIsModalOpen(true);
+  }, []);
+
+  // Función para abrir el modal de creación
+  const handleCreateNode = useCallback(() => {
+    setModalData({
+      mode: "create",
+    });
+    setIsModalOpen(true);
+  }, []);
+
+  // Función para manejar el guardado del modal
+  const handleModalSave = useCallback(
+    (data: {
+      title: string;
+      description: string;
+      url: string;
+      level: number;
+    }) => {
+      if (modalData?.mode === "edit" && modalData.nodeId) {
+        updateNode(modalData.nodeId, data);
+      } else {
+        const newNodeId = `node-${Date.now()}`;
+        const newNode: Node<NodeData> = {
+          id: newNodeId,
+          type: "customNode",
+          position: {
+            x: Math.random() * 500,
+            y: Math.random() * 500,
+          },
+          data: {
+            title: data.title,
+            description: data.description,
+            url: data.url,
+            type: 0,
+            level: data.level,
+            status: 1,
+            order: 0,
+            children: [],
+            onUpdate: updateNode,
+            onDelete: deleteNode,
+            onAddChild: handleAddChild,
+            onRemoveChild: handleRemoveChild,
+            onSetParent: handleSetParent,
+          },
+        };
+        setNodes((nds) => [...nds, newNode]);
+      }
+      setIsModalOpen(false);
+      setModalData(null);
+    },
+    [
+      modalData,
+      updateNode,
+      setNodes,
+      handleAddChild,
+      handleRemoveChild,
+      handleSetParent,
+      deleteNode,
+    ]
+  );
+
+  // Función para procesar los nodos y crear las conexiones
+  const processNodes = (nodes: Node[]): { nodes: Node[]; edges: Edge[] } => {
+    const processedNodes: Node[] = [];
+    const edges: Edge[] = [];
+    const NODE_WIDTH = 256; // Ancho del nodo (w-64 = 16rem = 256px)
+    const NODE_HEIGHT = 200; // Altura aproximada del nodo
+    const HORIZONTAL_SPACING = NODE_WIDTH + 100; // Espacio horizontal entre nodos
+    const VERTICAL_SPACING = NODE_HEIGHT + 50; // Espacio vertical entre niveles
+
+    // Función para calcular el ancho total de un nodo y sus hijos
+    const calculateTreeWidth = (node: Node): number => {
+      if (!node.data.children || !Array.isArray(node.data.children)) {
+        return NODE_WIDTH;
+      }
+      const childrenNodes = node.data.children.filter(
+        (child: any) => typeof child === "object"
+      );
+      if (childrenNodes.length === 0) {
+        return NODE_WIDTH;
+      }
+      const childrenWidth = childrenNodes.reduce(
+        (total: number, child: Node) => {
+          return total + calculateTreeWidth(child);
         },
+        0
+      );
+      return Math.max(
+        NODE_WIDTH,
+        childrenWidth + (childrenNodes.length - 1) * HORIZONTAL_SPACING
+      );
+    };
+
+    const processNode = (
+      node: Node,
+      level: number = 0,
+      x: number = 0,
+      y: number = 0
+    ) => {
+      // Procesar el nodo actual
+      const newNode = {
+        ...node,
+        type: "customNode",
+        position: { x, y },
         data: {
-          title: "Nuevo Nodo",
-          type: 0,
-          level: level,
-          status: 1,
-          order: 0,
-          children: [],
+          ...node.data,
           onUpdate: updateNode,
           onDelete: deleteNode,
           onAddChild: handleAddChild,
           onRemoveChild: handleRemoveChild,
           onSetParent: handleSetParent,
+          onEdit: () => handleEditNode(node.id, node.data),
         },
       };
-      setNodes((nds) => [...nds, newNode]);
-    },
-    [
-      setNodes,
-      updateNode,
-      deleteNode,
-      handleAddChild,
-      handleRemoveChild,
-      handleSetParent,
-    ]
-  );
+      processedNodes.push(newNode);
+
+      // Procesar los hijos si existen
+      if (node.data.children && Array.isArray(node.data.children)) {
+        const childrenNodes = node.data.children.filter(
+          (child: any) => typeof child === "object"
+        );
+        const childrenCount = childrenNodes.length;
+
+        if (childrenCount > 0) {
+          // Calcular el ancho total de todos los hijos
+          const childrenWidth = childrenNodes.reduce(
+            (total: number, child: Node) => {
+              return total + calculateTreeWidth(child);
+            },
+            0
+          );
+          const totalWidth =
+            childrenWidth + (childrenCount - 1) * HORIZONTAL_SPACING;
+
+          // Calcular la posición inicial x para centrar los hijos debajo del padre
+          const startX = x - totalWidth / 2 + NODE_WIDTH / 2;
+          let currentX = startX;
+
+          childrenNodes.forEach((childNode: Node) => {
+            // Calcular el ancho del subárbol del hijo
+            const childTreeWidth = calculateTreeWidth(childNode);
+
+            // Establecer la relación padre-hijo
+            childNode.data = {
+              ...childNode.data,
+              parentId: node.id,
+            };
+
+            // Procesar el hijo recursivamente
+            processNode(childNode, level + 1, currentX, y + VERTICAL_SPACING);
+
+            // Crear el edge
+            edges.push({
+              id: `edge-${node.id}-${childNode.id}`,
+              source: node.id,
+              target: childNode.id,
+              type: "smoothstep",
+              animated: true,
+              style: {
+                stroke:
+                  NODE_TYPES[childNode.data.level as keyof typeof NODE_TYPES]
+                    ?.color || "#6b7280",
+                strokeWidth: 2,
+              },
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+                color:
+                  NODE_TYPES[childNode.data.level as keyof typeof NODE_TYPES]
+                    ?.color || "#6b7280",
+              },
+            });
+
+            // Actualizar el array de hijos del nodo padre
+            const parentNode = processedNodes.find((n) => n.id === node.id);
+            if (parentNode) {
+              parentNode.data.children = [
+                ...(parentNode.data.children || []),
+                childNode.id,
+              ];
+            }
+
+            // Actualizar la posición X para el siguiente hijo
+            currentX += childTreeWidth + HORIZONTAL_SPACING;
+          });
+        }
+      }
+    };
+
+    // Procesar cada nodo raíz
+    const rootNodes = nodes.filter((node) => !node.data.parentId);
+    rootNodes.forEach((node) => {
+      const treeWidth = calculateTreeWidth(node);
+      const startX = (window.innerWidth - treeWidth) / 2;
+      processNode(node, 0, startX, 50);
+    });
+
+    return { nodes: processedNodes, edges };
+  };
 
   // Inicializar nodos con los datos de faqs.ts
   React.useEffect(() => {
@@ -404,7 +454,6 @@ const FAQFlowEditor: React.FC = () => {
       const shouldDelete = window.confirm("¿Desea eliminar esta conexión?");
       if (shouldDelete) {
         setEdges((eds) => eds.filter((e) => e.id !== edge.id));
-        // También eliminar la relación padre-hijo
         const [sourceId, targetId] = [edge.source, edge.target];
         handleRemoveChild(sourceId, targetId);
       }
@@ -418,9 +467,33 @@ const FAQFlowEditor: React.FC = () => {
       <div className="bg-white shadow-md p-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Editor de FAQs</h1>
         <div className="flex gap-4 items-center">
-          <AddNodeButton onAddNode={handleAddNode} />
+          <button
+            onClick={() => {
+              const { nodes: processedNodes, edges: processedEdges } =
+                processNodes(nodes);
+              setNodes(processedNodes);
+              setEdges(processedEdges);
+            }}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow-md flex items-center gap-2 transition-colors duration-200"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16m-7 6h7"
+              />
+            </svg>
+            Reordenar FAQs
+          </button>
+          <AddNodeButton onAddNode={handleCreateNode} />
           <div className="text-sm text-gray-600">
-            Nodos: {nodes.length} | Conexiones: {edges.length}
+            FAQs: {nodes.length} | Conexiones: {edges.length}
           </div>
         </div>
       </div>
@@ -432,7 +505,13 @@ const FAQFlowEditor: React.FC = () => {
         {/* Área del diagrama */}
         <div className="flex-1" style={{ width: "100%", height: "100%" }}>
           <ReactFlow
-            nodes={nodes}
+            nodes={nodes.map((node) => ({
+              ...node,
+              data: {
+                ...node.data,
+                onEdit: () => handleEditNode(node.id, node.data),
+              },
+            }))}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
@@ -482,6 +561,16 @@ const FAQFlowEditor: React.FC = () => {
       </div>
 
       <NodeLegend />
+
+      <NodeModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalData(null);
+        }}
+        onSave={handleModalSave}
+        initialData={modalData?.initialData}
+      />
     </div>
   );
 };

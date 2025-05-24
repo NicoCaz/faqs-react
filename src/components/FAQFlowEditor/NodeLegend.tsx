@@ -16,10 +16,6 @@ export const NodeLegend: React.FC = () => {
           </span>
         </div>
       ))}
-      <div className="text-xs text-gray-500 mt-2">
-        • Doble clic en nodo para editar
-        <br />• Arrastra entre nodos para conectar
-      </div>
     </div>
   );
 };
