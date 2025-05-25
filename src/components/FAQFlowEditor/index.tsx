@@ -13,13 +13,14 @@ import ReactFlow, {
 import type { Node, Edge, Connection } from "reactflow";
 import "reactflow/dist/style.css";
 import { faqs } from "../../mock/faqs";
+import faqsData from "../../mock/faqs.json";
 import { CustomNode } from "./CustomNode";
 import { NodeLegend } from "./NodeLegend";
 import { AddNodeButton } from "./AddNodeButton";
 import { NODE_TYPES } from "./types";
 import type { NodeData } from "./types";
 import { NodeModal } from "./NodeModal";
-import { updateFaqs } from "../../services/faqService";
+import { updateFaqs, initializeFaqs } from "../../services/faqService";
 
 // Función para actualizar el archivo JSON
 const updateFaqsJson = async (nodes: Node[]) => {
@@ -435,6 +436,10 @@ const FAQFlowEditor: React.FC = () => {
 
   // Inicializar nodos con los datos de faqs.ts
   React.useEffect(() => {
+    // Initialize FAQs data
+    const initialData = { faqs: faqsData.faqs };
+    initializeFaqs(initialData);
+
     const { nodes: processedNodes, edges: processedEdges } = processNodes(faqs);
     setNodes(processedNodes);
     setEdges(processedEdges);
