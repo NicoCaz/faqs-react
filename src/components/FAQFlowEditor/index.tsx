@@ -19,31 +19,25 @@ import { AddNodeButton } from "./AddNodeButton";
 import { NODE_TYPES } from "./types";
 import type { NodeData } from "./types";
 import { NodeModal } from "./NodeModal";
+import { updateFaqs } from "../../services/faqService";
 
 // Función para actualizar el archivo JSON
 const updateFaqsJson = async (nodes: Node[]) => {
   try {
-    console.log("Enviando datos a la API:", nodes);
-    const response = await fetch('/api/update-faqs', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ faqs: nodes }),
-    });
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || data.message || 'Error al guardar los cambios');
+    console.log("Actualizando FAQs:", nodes);
+    const response = await updateFaqs(nodes);
+
+    if (!response.success) {
+      throw new Error(response.message || "Error al guardar los cambios");
     }
 
-    if (!data.success) {
-      throw new Error(data.message || 'Error al guardar los cambios');
-    }
+    return response;
   } catch (error) {
-    console.error('Error al actualizar el archivo JSON:', error);
-    alert(`Error al guardar los cambios: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    console.error("Error al actualizar el archivo JSON:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Error desconocido";
+    alert(`Error al guardar los cambios: ${errorMessage}`);
+    throw error;
   }
 };
 
@@ -310,14 +304,20 @@ const FAQFlowEditor: React.FC = () => {
     const HORIZONTAL_SPACING = NODE_WIDTH + 100; // Espacio horizontal entre nodos
     const VERTICAL_SPACING = NODE_HEIGHT + 50; // Espacio vertical entre niveles
 
+    // Crear un mapa de nodos por ID para acceso rápido
+    const nodesMap = new Map(nodes.map((node) => [node.id, node]));
+
     // Función para calcular el ancho total de un nodo y sus hijos
     const calculateTreeWidth = (node: Node): number => {
       if (!node.data.children || !Array.isArray(node.data.children)) {
         return NODE_WIDTH;
       }
-      const childrenNodes = node.data.children.filter(
-        (child: any) => typeof child === "object"
-      );
+      const childrenNodes = node.data.children
+        .map((childId: string) => nodesMap.get(childId))
+        .filter(
+          (child: Node | undefined): child is Node => child !== undefined
+        );
+
       if (childrenNodes.length === 0) {
         return NODE_WIDTH;
       }
@@ -358,9 +358,12 @@ const FAQFlowEditor: React.FC = () => {
 
       // Procesar los hijos si existen
       if (node.data.children && Array.isArray(node.data.children)) {
-        const childrenNodes = node.data.children.filter(
-          (child: any) => typeof child === "object"
-        );
+        const childrenNodes = node.data.children
+          .map((childId: string) => nodesMap.get(childId))
+          .filter(
+            (child: Node | undefined): child is Node => child !== undefined
+          );
+
         const childrenCount = childrenNodes.length;
 
         if (childrenCount > 0) {
@@ -411,15 +414,6 @@ const FAQFlowEditor: React.FC = () => {
                     ?.color || "#6b7280",
               },
             });
-
-            // Actualizar el array de hijos del nodo padre
-            const parentNode = processedNodes.find((n) => n.id === node.id);
-            if (parentNode) {
-              parentNode.data.children = [
-                ...(parentNode.data.children || []),
-                childNode.id,
-              ];
-            }
 
             // Actualizar la posición X para el siguiente hijo
             currentX += childTreeWidth + HORIZONTAL_SPACING;

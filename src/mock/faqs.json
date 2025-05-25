@@ -16,249 +16,111 @@
         "displayConfig": {
           "isEnabledOnNonBusinessDay": true,
           "enabledOnChannels": ["ispublic", "officebanking"]
+        }
+      }
+    },
+    {
+      "id": "6363fba09204ee669da68778",
+      "type": "card",
+      "data": {
+        "title": "Pago Directo",
+        "url": "pago-directo",
+        "to": "/n3/pago-directo",
+        "type": 0,
+        "level": 2,
+        "status": 1,
+        "order": 1000,
+        "parent": "6363c0db9204ee669da68777",
+        "displayConfig": {
+          "isEnabledOnNonBusinessDay": true,
+          "enabledOnChannels": ["ispublic", "officebanking"]
+        }
+      }
+    },
+    {
+      "id": "6723c46e832f86e945c030f4",
+      "type": "card",
+      "data": {
+        "title": "¿Qué es Pago Directo?",
+        "url": "que-es-pago-directo",
+        "to": "/n4/que-es-pago-directo",
+        "subtitle": {
+          "text": "Información general"
         },
-        "children": [
-          {
-            "id": "6363fba09204ee669da68778",
-            "type": "card",
-            "data": {
-              "title": "Pago Directo",
-              "url": "pago-directo",
-              "to": "/n3/pago-directo",
-              "type": 0,
-              "level": 2,
-              "status": 1,
-              "order": 1000,
-              "parent": "6363c0db9204ee669da68777",
-              "displayConfig": {
-                "isEnabledOnNonBusinessDay": true,
-                "enabledOnChannels": ["ispublic", "officebanking"]
-              },
-              "children": [
-                {
-                  "id": "6723c46e832f86e945c030f4",
-                  "type": "card",
-                  "data": {
-                    "title": "¿Qué es Pago Directo?",
-                    "url": "que-es-pago-directo",
-                    "to": "/n4/que-es-pago-directo",
-                    "subtitle": {
-                      "text": "Información general"
-                    },
-                    "type": 0,
-                    "level": 3,
-                    "status": 1,
-                    "order": 16000,
-                    "parent": "6363fba09204ee669da68778",
-                    "content": "67267bce832f86e945c03399",
-                    "displayConfig": {
-                      "isEnabledOnNonBusinessDay": true,
-                      "enabledOnChannels": ["ispublic"]
-                    },
-                    "children": [
-                      {
-                        "id": "67267bce832f86e945c03399",
-                        "type": "card",
-                        "data": {
-                          "title": "¿Qué es Pago Directo?",
-                          "url": "/n4/que-es-pago-directo",
-                          "type": 0,
-                          "level": 4,
-                          "status": 1,
-                          "order": 0,
-                          "parent": "6723c46e832f86e945c030f4",
-                          "guruId": "0a17c7d0-97f7-4ebd-9a44-f7ed5604df9e",
-                          "htmlContent": "<p class=\"ghq-card-content__paragraph\" data-ghq-card-content-type=\"paragraph\">Permite a una empresa cobrar sus facturas <strong class=\"ghq-card-content__bold\" data-ghq-card-content-type=\"BOLD\">por débito automático</strong> en las cuentas de sus clientes, siempre y cuando estén asociadas a COELSA.</p><p class=\"ghq-card-content__paragraph ghq-is-empty\" data-ghq-card-content-type=\"paragraph\"><a class=\"ghq-card-content__link\" data-ghq-card-content-type=\"LINK\" href=\"http:///n4/como-doy-de-alta-pago-directo\" target=\"_blank\" rel=\"noopener noreferrer\"><strong class=\"ghq-card-content__bold\" data-ghq-card-content-type=\"BOLD\"><span class=\"ghq-card-content__text-color\" data-ghq-card-content-type=\"TEXT_COLOR\" style=\"color:#ff8a60\">Conocé cómo darte de alta.</span></strong></a></p><p class=\"ghq-card-content__paragraph ghq-is-empty\" data-ghq-card-content-type=\"paragraph\"></p>",
-                          "digitalType": "Cobros y pagos",
-                          "digitalSubType": "Pago directo",
-                          "tags": [],
-                          "htmlTabContent": [],
-                          "multimedia": [],
-                          "htmlStepContent": []
-                        }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "id": "6723c494832f86e945c030f6",
-                  "type": "card",
-                  "data": {
-                    "title": "¿Cómo es el proceso de Pago Directo?",
-                    "url": "como-es-el-proceso-de-pago-directo",
-                    "to": "/n4/como-es-el-proceso-de-pago-directo",
-                    "subtitle": {
-                      "text": "Información general"
-                    },
-                    "type": 0,
-                    "level": 3,
-                    "status": 1,
-                    "order": 16100,
-                    "parent": "6363fba09204ee669da68778",
-                    "content": "67267bf6832f86e945c0339a",
-                    "displayConfig": {
-                      "isEnabledOnNonBusinessDay": true,
-                      "enabledOnChannels": ["ispublic", "officebanking"]
-                    },
-                    "children": [
-                      {
-                        "id": "67267bf6832f86e945c0339a",
-                        "type": "card",
-                        "data": {
-                          "title": "¿Cómo es el proceso de Pago Directo?",
-                          "url": "/n4/como-es-el-proceso-de-pago-directo",
-                          "type": 0,
-                          "level": 4,
-                          "status": 1,
-                          "order": 0,
-                          "parent": "6723c494832f86e945c030f6",
-                          "guruId": "0a17c7d0-97f7-4ebd-9a44-f7ed5604df9e",
-                          "htmlContent": "<p class=\"ghq-card-content__paragraph\" data-ghq-card-content-type=\"paragraph\">El proceso de Pago Directo consiste en...</p>",
-                          "digitalType": "Cobros y pagos",
-                          "digitalSubType": "Pago directo",
-                          "tags": [],
-                          "htmlTabContent": [],
-                          "multimedia": [],
-                          "htmlStepContent": []
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "id": "6363fc5c9204ee669da68779",
-            "type": "card",
-            "data": {
-              "title": "Cobro de Proveedores",
-              "url": "cobro-de-proveedores",
-              "to": "/n3/cobro-de-proveedores",
-              "type": 0,
-              "level": 2,
-              "status": 1,
-              "order": 1000,
-              "parent": "6363c0db9204ee669da68777",
-              "displayConfig": {
-                "isEnabledOnNonBusinessDay": true,
-                "enabledOnChannels": ["ispublic", "officebanking"]
-              },
-              "children": [
-                {
-                  "id": "6723c4be832f86e945c030f7",
-                  "type": "card",
-                  "data": {
-                    "title": "¿Cómo funciona el cobro de proveedores?",
-                    "url": "como-funciona-el-cobro-de-proveedores",
-                    "to": "/n4/como-funciona-el-cobro-de-proveedores",
-                    "subtitle": {
-                      "text": "Información general"
-                    },
-                    "type": 0,
-                    "level": 3,
-                    "status": 1,
-                    "order": 17000,
-                    "parent": "6363fc5c9204ee669da68779",
-                    "content": "67267c29832f86e945c0339b",
-                    "displayConfig": {
-                      "isEnabledOnNonBusinessDay": true,
-                      "enabledOnChannels": ["ispublic", "officebanking"]
-                    },
-                    "children": [
-                      {
-                        "id": "67267c29832f86e945c0339b",
-                        "type": "card",
-                        "data": {
-                          "title": "¿Cómo funciona el cobro de proveedores?",
-                          "url": "/n4/como-funciona-el-cobro-de-proveedores",
-                          "type": 0,
-                          "level": 4,
-                          "status": 1,
-                          "order": 0,
-                          "parent": "6723c4be832f86e945c030f7",
-                          "guruId": "0a17c7d0-97f7-4ebd-9a44-f7ed5604df9e",
-                          "htmlContent": "<p class=\"ghq-card-content__paragraph\" data-ghq-card-content-type=\"paragraph\">El cobro de proveedores permite...</p>",
-                          "digitalType": "Cobros y pagos",
-                          "digitalSubType": "Cobro de proveedores",
-                          "tags": [],
-                          "htmlTabContent": [],
-                          "multimedia": [],
-                          "htmlStepContent": []
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "id": "6363fc939204ee669da6877a",
-            "type": "card",
-            "data": {
-              "title": "Cobranza Integrada",
-              "url": "cobranza-integrada-cobros",
-              "to": "/n3/cobranza-integrada-cobros",
-              "type": 0,
-              "level": 2,
-              "status": 1,
-              "order": 1,
-              "parent": "6363c0db9204ee669da68777",
-              "displayConfig": {
-                "isEnabledOnNonBusinessDay": true,
-                "enabledOnChannels": ["ispublic", "officebanking"]
-              },
-              "children": [
-                {
-                  "id": "6723c59b832f86e945c030f8",
-                  "type": "card",
-                  "data": {
-                    "title": "¿Qué es la Cobranza Integrada?",
-                    "url": "que-es-la-cobranza-integrada",
-                    "to": "/n4/que-es-la-cobranza-integrada",
-                    "subtitle": {
-                      "text": "Información general"
-                    },
-                    "type": 0,
-                    "level": 3,
-                    "status": 1,
-                    "order": 18000,
-                    "parent": "6363fc939204ee669da6877a",
-                    "content": "67267c53832f86e945c0339c",
-                    "displayConfig": {
-                      "isEnabledOnNonBusinessDay": true,
-                      "enabledOnChannels": ["ispublic", "officebanking"]
-                    },
-                    "children": [
-                      {
-                        "id": "67267c53832f86e945c0339c",
-                        "type": "card",
-                        "data": {
-                          "title": "¿Qué es la Cobranza Integrada?",
-                          "url": "/n4/que-es-la-cobranza-integrada",
-                          "type": 0,
-                          "level": 4,
-                          "status": 1,
-                          "order": 0,
-                          "parent": "6723c59b832f86e945c030f8",
-                          "guruId": "0a17c7d0-97f7-4ebd-9a44-f7ed5604df9e",
-                          "htmlContent": "<p class=\"ghq-card-content__paragraph\" data-ghq-card-content-type=\"paragraph\">La Cobranza Integrada es un servicio que permite...</p>",
-                          "digitalType": "Cobros y pagos",
-                          "digitalSubType": "Cobranza integrada",
-                          "tags": [],
-                          "htmlTabContent": [],
-                          "multimedia": [],
-                          "htmlStepContent": []
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ]
+        "type": 0,
+        "level": 3,
+        "status": 1,
+        "order": 16000,
+        "parent": "6363fba09204ee669da68778",
+        "content": "67267bce832f86e945c03399",
+        "displayConfig": {
+          "isEnabledOnNonBusinessDay": true,
+          "enabledOnChannels": ["ispublic"]
+        }
+      }
+    },
+    {
+      "id": "67267bce832f86e945c03399",
+      "type": "card",
+      "data": {
+        "title": "¿Qué es Pago Directo?",
+        "url": "/n4/que-es-pago-directo",
+        "type": 0,
+        "level": 4,
+        "status": 1,
+        "order": 0,
+        "parent": "6723c46e832f86e945c030f4",
+        "guruId": "0a17c7d0-97f7-4ebd-9a44-f7ed5604df9e",
+        "htmlContent": "<p class=\"ghq-card-content__paragraph\" data-ghq-card-content-type=\"paragraph\">Permite a una empresa cobrar sus facturas <strong class=\"ghq-card-content__bold\" data-ghq-card-content-type=\"BOLD\">por débito automático</strong> en las cuentas de sus clientes, siempre y cuando estén asociadas a COELSA.</p><p class=\"ghq-card-content__paragraph ghq-is-empty\" data-ghq-card-content-type=\"paragraph\"><a class=\"ghq-card-content__link\" data-ghq-card-content-type=\"LINK\" href=\"http:///n4/como-doy-de-alta-pago-directo\" target=\"_blank\" rel=\"noopener noreferrer\"><strong class=\"ghq-card-content__bold\" data-ghq-card-content-type=\"BOLD\"><span class=\"ghq-card-content__text-color\" data-ghq-card-content-type=\"TEXT_COLOR\" style=\"color:#ff8a60\">Conocé cómo darte de alta.</span></strong></a></p><p class=\"ghq-card-content__paragraph ghq-is-empty\" data-ghq-card-content-type=\"paragraph\"></p>",
+        "digitalType": "Cobros y pagos",
+        "digitalSubType": "Pago directo",
+        "tags": [],
+        "htmlTabContent": [],
+        "multimedia": [],
+        "htmlStepContent": []
+      }
+    },
+    {
+      "id": "6723c494832f86e945c030f6",
+      "type": "card",
+      "data": {
+        "title": "¿Cómo es el proceso de Pago Directo?",
+        "url": "como-es-el-proceso-de-pago-directo",
+        "to": "/n4/como-es-el-proceso-de-pago-directo",
+        "subtitle": {
+          "text": "Información general"
+        },
+        "type": 0,
+        "level": 3,
+        "status": 1,
+        "order": 16100,
+        "parent": "6363fba09204ee669da68778",
+        "content": "67267bf6832f86e945c0339a",
+        "displayConfig": {
+          "isEnabledOnNonBusinessDay": true,
+          "enabledOnChannels": ["ispublic", "officebanking"]
+        }
+      }
+    },
+    {
+      "id": "67267bf6832f86e945c0339a",
+      "type": "card",
+      "data": {
+        "title": "¿Cómo es el proceso de Pago Directo?",
+        "url": "/n4/como-es-el-proceso-de-pago-directo",
+        "type": 0,
+        "level": 4,
+        "status": 1,
+        "order": 0,
+        "parent": "6723c494832f86e945c030f6",
+        "guruId": "045d3760-1039-4f2c-a5bf-42d262df3e61",
+        "htmlContent": "<p class=\"ghq-card-content__paragraph\" data-ghq-card-content-type=\"paragraph\">1.La empresa solicita al Banco el pago directo a sus clientes.</p><p class=\"ghq-card-content__paragraph\" data-ghq-card-content-type=\"paragraph\">2.Los fondos se acreditan:</p><ul class=\"ghq-card-content__bulleted-list\" data-ghq-card-content-type=\"BULLETED_LIST\"><li class=\"ghq-card-content__bulleted-list-item\" data-ghq-card-content-type=\"BULLETED_LIST_ITEM\"><strong class=\"ghq-card-content__bold\" data-ghq-card-content-type=\"BOLD\">A las 24 h:</strong> si son cuentas del Banco Galicia.</li><li class=\"ghq-card-content__bulleted-list-item\" data-ghq-card-content-type=\"BULLETED_LIST_ITEM\"><strong class=\"ghq-card-content__bold\" data-ghq-card-content-type=\"BOLD\">A las 48 h:</strong> si son cuentas de otros bancos.</li></ul>",
+        "digitalType": "Cobros y pagos",
+        "digitalSubType": "Pago directo",
+        "tags": [],
+        "htmlTabContent": [],
+        "multimedia": [],
+        "htmlStepContent": []
       }
     }
   ]
